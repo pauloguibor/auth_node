@@ -1,9 +1,16 @@
 import express from 'express';
 import statusRoute from './routes/status.route';
 import usersRoute from './routes/users.route';
+//const bodyParser = require('body-parser');
+
 const app = express()
 
 //config app
+/* 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json()) 
+*/
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 

@@ -1,6 +1,7 @@
 import { Router} from "express";
 import { rmSync } from "fs";
 import {StatusCodes} from 'http-status-codes';
+import userRepository from "../repositories/user.repository";
 // , NextFunction, Response, Request 
 // get users
 // get users/:uuid
@@ -10,36 +11,45 @@ import {StatusCodes} from 'http-status-codes';
 
 const usersRoute = Router();
 
-usersRoute.get('/users', (req, res, next) => {
-    const users = [{userName: "Paulo" }]
+
+usersRoute.get('/users', async (req, res, next) => {
+    const users = await userRepository.findAllUsers();
     res.status(StatusCodes.OK).send(users);
 });
 
-usersRoute.get('/users/:id', (req, res, next) => {
-    if (req.params.id == "Maria"){
-        res.status(StatusCodes.OK).send("com parametro Maria");
+usersRoute.get('/users/:id', async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        const user = await userRepository.findById(id);
+        res.status(StatusCodes.OK).send(user);
+    } catch (error) {
+        next(error);
     }
-    res.status(StatusCodes.OK).send(`com parametro Qualquer ${req.params.id}`);
 });
 
-usersRoute.post('/post', (req, res, next)=>{
-    const bodyConfig = req.body;
-    //res.status(StatusCodes.CREATED).send(bodyConfig)
-    res.status(200).send(bodyConfig)
-
-})
+usersRoute.post('/users', async (req, res, next) => {
+    const newUser = req.body;
+    const id = await userRepository.create(newUser);
+    res.status(StatusCodes.CREATED).send(id);
+});
 
 // req put
-usersRoute.put('/users/:id', (req, res, next) =>{
-    const id = req.params.id
-    const bodyConfig = req.body
-    res.status(200).send(bodyConfig)
-})
+usersRoute.put('/users/:id', async (req, res, next) => {
+    const id = req.params.id;
+    const modifiedUser = req.body;
 
-usersRoute.delete('/users/:id', (req, res, next) => {
-    const id = req.params.id
-    res.status(200).send(`user deletado ${id}`)
-})
+    modifiedUser.id = id;
+
+    await userRepository.update(modifiedUser);
+
+    res.status(StatusCodes.OK).send();
+});
+
+usersRoute.delete('/users/:id', async (req, res, next) => {
+    const id = req.params.id;
+    await userRepository.remove(id);
+    res.sendStatus(StatusCodes.OK);
+});
 
 // usersRoute.get('/users/:id', (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
 //     if (req.params.id == "Maria"){
