@@ -1,4 +1,5 @@
 import express from 'express';
+import errorHandler from './middlewares/error_handler.middleware';
 import statusRoute from './routes/status.route';
 import usersRoute from './routes/users.route';
 //const bodyParser = require('body-parser');
@@ -17,6 +18,8 @@ app.use(express.urlencoded({ extended: true }))
 // config rotas
 app.use(usersRoute);
 app.use(statusRoute)
+
+app.use(errorHandler);
 
 app.get("/status", (req, res, next) => {
     res.status(200)
